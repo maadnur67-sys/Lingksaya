@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Video + Profile</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      overflow-x: hidden;
+      height: 200vh;
+    }
+
+    video.bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      object-fit: cover;
+      z-index: -1;
+    }
+
+    .overlay {
+      position: fixed;
+      width: 100%;
+      height: 100vh;
+      background: linear-gradient(120deg, rgba(0,0,0,0.4), rgba(0,255,255,0.08));
+      z-index: 0;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      opacity: 0.3;
+    }
+
+    .sound-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 10;
+      padding: 10px 15px;
+      background: rgba(0,0,0,0.5);
+      border: none;
+      color: cyan;
+      cursor: pointer;
+      border-radius: 8px;
+      box-shadow: 0 0 10px white;
+    }
+
+    .start-text {
+      position: absolute;
+      top: 45%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 26px;
+      font-weight: bold;
+      text-align: center;
+      animation: blink 1.5s infinite;
+      z-index: 5;
+    }
+
+    @keyframes blink {
+      0%,100% {opacity: 1;}
+      50% {opacity: 0.4;}
+    }
+
+    .hacker-text {
+      position: absolute;
+      top: 55%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: monospace;
+      font-size: 20px;
+      color: #green;
+      animation: glitchText 1s infinite;
+      z-index: 5;
+    }
+
+    @keyframes glitchText {
+      0% { transform: translate(-50%,0); }
+      20% { transform: translate(-52%,2px); color: red; }
+      40% { transform: translate(-48%,-2px); color: green; }
+      60% { transform: translate(-50%,1px); }
+      80% { transform: translate(-51%,-1px); }
+      100% { transform: translate(-50%,0); }
+    }
+
+    .hacker-run {
+      position: absolute;
+      bottom: 20px;
+      width: 100%;
+      overflow: hidden;
+      z-index: 6;
+    }
+
+    .hacker-run span {
+      display: inline-block;
+      white-space: nowrap;
+      padding-left: 100%;
+      animation: runText 12s linear infinite;
+      font-family: monospace;
+      font-size: 16px;
+      color: white;
+    }
+
+    @keyframes runText {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
+
+    .follow {
+      position: absolute;
+      bottom: 40px;
+      width: 100%;
+      text-align: center;
+      font-family: monospace;
+      color: white;
+    }
+
+    .follow h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .follow p {
+      margin: 5px 0;
+      font-size: 18px;
+    }
+
+    .virus {
+      position: fixed;
+      background: black;
+      color: red;
+      border: 2px solid red;
+      padding: 15px;
+      font-family: monospace;
+      font-size: 14px;
+      display: none;
+      z-index: 999;
+      box-shadow: 0 0 20px red;
+    }
+
+    .profile-box {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      text-align: center;
+      z-index: 10;
+      opacity: 0;
+    }
+
+    .profile-box.show {
+      animation: slideFade 1s ease forwards;
+    }
+
+    @keyframes slideFade {
+      from { opacity: 0; transform: translateX(50px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .profile-img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 2px solid cyan;
+    }
+
+    .profile-name {
+      margin-top: 8px;
+      font-family: monospace;
+      font-size: 14px;
+      color: white;
+      text-shadow: 0 0 8px white;
+    }
+
+    .menu {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .menu a {
+      color: white;
+      text-decoration: none;
+      background: rgba(0,255,255,0.1);
+      padding: 6px;
+      border-radius: 6px;
+    }
+
+    .bottom-effect {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 120px;
+      overflow: hidden;
+      z-index: 2;
+    }
+
+    .glow-line {
+      width: 100%;
+      height: 2px;
+      background: cyan;
+      box-shadow: 0 0 20px cyan;
+      position: absolute;
+      bottom: 40px;
+      animation: glowMove 3s linear infinite;
+    }
+
+    @keyframes glowMove {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .scan-line {
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        transparent,
+        transparent 2px,
+        rgba(0,255,255,0.05) 3px
+      );
+      animation: scanMove 4s linear infinite;
+    }
+
+    @keyframes scanMove {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(10px); }
+    }
+  </style>
+</head>
+
+<body>
+
+  <video class="bg" autoplay muted loop>
+    <source src="maad7.mp4" type="video/mp4">
+  </video>
+
+  <div class="overlay"></div>
+  <canvas id="matrix"></canvas>
+
+  <div class="virus" id="virusBox">
+    ⚠ SYSTEM INFECTED...<br>
+    scanning... 99%<br>
+    accessing data...<br>
+    ERROR... just kidding 😈
+  </div>
+
+  <audio id="audio" loop>
+    <source src="maad3.mp3" type="audio/mp3">
+  </audio>
+
+  <div class="start-text" id="startText">
+     Klik Sound Untuk Memulai
+  </div>
+
+  <div class="hacker-text">
+     "klick logo dana utuk berbagi saldo".jangan lupa follow ig
+  </div>
+
+  <div class="hacker-run">
+    <span>> sya  | butuh uang | pinjem 100 |</span>
+  </div>
+
+  <button class="sound-btn" onclick="playSound()">Play Sound 🔊</button>
+
+  <div class="profile-box" id="profileBox">
+    <img src="maad4.png" class="profile-img">
+    <div class="profile-name">maad.joy</div>
+
+    <div class="menu">
+      <a href="https://www.instagram.com/nurmaad87" target="_blank">
+        <i class="fab fa-instagram"></i> IG
+      </a>
+
+      <a href="https://wa.me/6283898633676" target="_blank">
+        <i class="fab fa-whatsapp"></i> WA
+      </a>
+
+      <a href="https://link.dana.id" target="_blank">
+        💳 Dana
+      </a>
+    </div>
+  </div>
+
+  <div class="follow">
+    <h2>hengker gadungan</h2>
+    <p>@maad.joy</p>
+  </div>
+
+  <div class="bottom-effect">
+    <div class="glow-line"></div>
+    <div class="scan-line"></div>
+  </div>
+
+  <script>
+    function playSound() {
+      let audio = document.getElementById("audio");
+      audio.play();
+
+      document.getElementById("profileBox").classList.add("show");
+      document.getElementById("startText").style.display = "none";
+    }
+
+    function randomVirus() {
+      const virus = document.getElementById("virusBox");
+
+      const x = Math.random() * (window.innerWidth - 200);
+      const y = Math.random() * (window.innerHeight - 100);
+
+      virus.style.left = x + "px";
+      virus.style.top = y + "px";
+      virus.style.display = "block";
+
+      setTimeout(() => {
+        virus.style.display = "none";
+      }, 1500);
+    }
+
+    setInterval(() => {
+      if (Math.random() > 0.6) {
+        randomVirus();
+      }
+    }, 2000);
+
+    const canvas = document.getElementById("matrix");
+    const ctx = canvas.getContext("2d");
+
+    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+
+    const letters = "01ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const fontSize = 14;
+    const columns = canvas.width / fontSize;
+    const drops = Array(Math.floor(columns)).fill(1);
+
+    function draw() {
+      ctx.fillStyle = "rgba(0,0,0,0.05)";
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+
+      ctx.fillStyle = "#00ffff";
+      ctx.font = fontSize + "px monospace";
+
+      drops.forEach((y, i) => {
+        const text = letters[Math.floor(Math.random()*letters.length)];
+        ctx.fillText(text, i*fontSize, y*fontSize);
+
+        if (y*fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+
+        drops[i]++;
+      });
+    }
+
+    setInterval(draw, 33);
+  </script>
+
+</body>
+</html>
